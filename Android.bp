@@ -1,0 +1,46 @@
+// Copyright 2020 The Android Open Source Project
+
+cc_defaults {
+    name: "exfat-utils-defaults",
+
+    cflags: [
+        "-DEXFAT_TOOLS_VERSION=\"1.0.1\"",
+    ],
+    local_include_dirs: [
+        "include",
+        "mkfs",
+        "fsck",
+    ],
+}
+
+cc_library_static {
+    name: "libexfat",
+
+    srcs: [
+        "lib/exfat_iconv.c",
+        "lib/libexfat.c",
+    ],
+    defaults: ["exfat-utils-defaults"],
+}
+
+cc_binary {
+    name: "mkfs.exfat",
+
+    srcs: [
+        "mkfs/mkfs.c",
+        "mkfs/upcase.c",
+    ],
+    defaults: ["exfat-utils-defaults"],
+    static_libs: ["libexfat"],
+}
+
+cc_binary {
+    name: "fsck.exfat",
+
+    srcs: [
+        "fsck/fsck.c",
+        "fsck/repair.c",
+    ],
+    defaults: ["exfat-utils-defaults"],
+    static_libs: ["libexfat"],
+}
