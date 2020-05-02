@@ -78,7 +78,7 @@ static void exfat_setup_boot_sector(struct pbr *ppbr,
 static int exfat_write_sector(struct exfat_blk_dev *bd, void *buf,
 		unsigned int sec_off)
 {
-	int bytes;
+	unsigned int bytes;
 	unsigned long long offset = sec_off * bd->sector_size;
 
 	lseek(bd->dev_fd, offset, SEEK_SET);
@@ -198,7 +198,8 @@ static int exfat_write_checksum_sector(struct exfat_blk_dev *bd,
 		unsigned int checksum, bool is_backup)
 {
 	__le32 *checksum_buf;
-	int i, ret = 0;
+	int ret = 0;
+	size_t i;
 	unsigned int sec_idx = CHECKSUM_SEC_IDX;
 
 	checksum_buf = malloc(bd->sector_size);
@@ -322,7 +323,7 @@ static int exfat_create_fat_table(struct exfat_blk_dev *bd,
 static int exfat_create_bitmap(struct exfat_blk_dev *bd)
 {
 	char *bitmap;
-	int i, nbytes;
+	unsigned int i, nbytes;
 
 	bitmap = malloc(finfo.bitmap_byte_len);
 	if (!bitmap)

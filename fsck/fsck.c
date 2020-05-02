@@ -327,7 +327,7 @@ static ssize_t exfat_file_read(struct exfat *exfat, struct exfat_inode *node,
 	ssize_t read_size;
 	size_t remain_size;
 
-	if (file_offset >= node->size)
+	if (file_offset >= (off_t)node->size)
 		return EOF;
 
 	clus_size = EXFAT_CLUSTER_SIZE(exfat->bs);
@@ -383,7 +383,7 @@ static int boot_region_checksum(struct exfat *exfat)
 	__le32 checksum;
 	unsigned short size;
 	void *sect;
-	int i;
+	size_t i;
 
 	size = EXFAT_SECTOR_SIZE(exfat->bs);
 	sect = malloc(size);
@@ -631,7 +631,7 @@ static int exfat_de_iter_get(struct exfat_de_iter *iter,
 				int ith, struct exfat_dentry **dentry)
 {
 	off_t de_next_file_offset;
-	int de_next_offset;
+	unsigned int de_next_offset;
 	bool need_read_1_clus = false;
 	int ret;
 
@@ -755,7 +755,7 @@ static bool check_inode(struct exfat *exfat, struct exfat_inode *parent,
 static void dentry_calc_checksum(struct exfat_dentry *dentry,
 				__le16 *checksum, bool primary)
 {
-	int i;
+	size_t i;
 	uint8_t *bytes;
 
 	bytes = (uint8_t *)dentry;
@@ -921,7 +921,7 @@ static bool read_alloc_bitmap(struct exfat_de_iter *iter)
 {
 	struct exfat_dentry *dentry;
 	struct exfat *exfat;
-	size_t alloc_bitmap_size;
+	ssize_t alloc_bitmap_size;
 
 	exfat = iter->exfat;
 	if (exfat_de_iter_get(iter, 0, &dentry))
@@ -971,7 +971,7 @@ static bool read_upcase_table(struct exfat_de_iter *iter)
 {
 	struct exfat_dentry *dentry;
 	struct exfat *exfat;
-	size_t size;
+	ssize_t size;
 	__le16 *upcase;
 	__le32 checksum;
 
@@ -986,8 +986,8 @@ static bool read_upcase_table(struct exfat_de_iter *iter)
 		return false;
 	}
 
-	size = (size_t)le64_to_cpu(dentry->upcase_size);
-	if (size > EXFAT_MAX_UPCASE_CHARS * sizeof(__le16) ||
+	size = le64_to_cpu(dentry->upcase_size);
+	if (size > (ssize_t)(EXFAT_MAX_UPCASE_CHARS * sizeof(__le16)) ||
 			size == 0 || size % sizeof(__le16)) {
 		exfat_err("invalid size of upcase table. 0x%llx\n",
 			le64_to_cpu(dentry->upcase_size));
